@@ -1,0 +1,26 @@
+{
+  "name": "פרשת השבוע של משפחת כהן",
+  "short_name": "פרשת השבוע",
+  "description": "כל 54 פרשיות התורה — תקצירים, פירושים ושיעורי וידאו שבועיים",
+  "lang": "he",
+  "dir": "rtl",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f5f0e8",
+  "theme_color": "#43222e",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "og-parshat-hashavua.png",
+      "sizes": "1200x630",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

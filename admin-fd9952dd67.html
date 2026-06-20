@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>ניהול שיעורים — פרשת השבוע</title>
+<style>
+:root{
+  --bg:#f4ead7; --surface:#fffaf0; --surface-2:#fbf2e2; --ink:#3a2a1c; --ink-soft:#7a6552;
+  --gold:#bb8a2c; --gold-soft:#ecd9ab; --wine:#6e5024; --terra:#b07b34; --ok:#3f7d54; --danger:#b23b3b;
+  --line:rgba(110,80,36,0.2);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Heebo','Noto Sans Hebrew',system-ui,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5}
+button,input,select{font-family:inherit}
+.wrap{max-width:1000px;margin:0 auto;padding:0 16px 80px}
+/* ---- login ---- */
+.gate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.gate-card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:34px 30px;max-width:400px;width:100%;box-shadow:0 16px 50px rgba(122,46,58,0.12);text-align:center}
+.gate-card h1{font-size:23px;color:var(--wine);margin-bottom:6px}
+.gate-card p{font-size:14px;color:var(--ink-soft);margin-bottom:20px}
+.gate-card input{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:10px;font-size:16px;margin-bottom:12px;background:var(--surface-2)}
+.gate-card input:focus{outline:2px solid var(--gold-soft);border-color:var(--gold)}
+.gate-card button{width:100%;padding:12px;border:0;border-radius:10px;background:var(--wine);color:#fff;font-size:16px;font-weight:700;cursor:pointer;transition:filter .2s}
+.gate-card button:hover{filter:brightness(1.08)}
+.gate-err{color:var(--danger);font-size:13px;font-weight:600;min-height:18px;margin-top:4px}
+/* ---- header ---- */
+.topbar{position:sticky;top:0;z-index:20;background:linear-gradient(90deg,var(--wine),#57401a);color:#fff;padding:12px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;box-shadow:0 3px 14px rgba(0,0,0,0.18)}
+.topbar h1{font-size:18px;font-weight:800;margin-inline-end:auto}
+.tb-btn{background:rgba(255,255,255,0.14);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:9px;padding:8px 14px;font-size:13.5px;font-weight:700;cursor:pointer;transition:background .2s}
+.tb-btn:hover{background:rgba(255,255,255,0.26)}
+.tb-btn.primary{background:var(--gold);color:#3a2a1c;border-color:var(--gold)}
+.tb-btn.ghost{background:transparent}
+/* ---- token bar ---- */
+.tokenbar{background:var(--surface-2);border-bottom:1px solid var(--line);padding:10px 16px;font-size:13px;display:none;align-items:center;gap:10px;flex-wrap:wrap}
+.tokenbar.show{display:flex}
+.tokenbar input{flex:1;min-width:200px;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:#fff;font-size:13px;direction:ltr}
+.tokenbar label{display:flex;align-items:center;gap:5px;color:var(--ink-soft);white-space:nowrap}
+.tokenbar .tb-btn{background:var(--gold);color:#fff;border:1px solid var(--gold)}
+.tokenbar .tb-btn:hover{filter:brightness(1.08)}
+/* ---- content ---- */
+.note{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 16px;font-size:13px;color:var(--ink-soft);margin:18px 0}
+.book-h{font-size:15px;font-weight:800;color:var(--wine);margin:26px 4px 10px;padding-bottom:6px;border-bottom:2px solid var(--gold-soft)}
+.p-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:12px;box-shadow:0 2px 8px rgba(122,46,58,0.05)}
+.p-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.p-num{width:30px;height:30px;border-radius:50%;background:var(--gold-soft);color:var(--wine);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0}
+.p-name{font-size:18px;font-weight:800;color:var(--ink)}
+.p-tag{font-size:11px;font-weight:700;color:#fff;background:var(--gold);border-radius:20px;padding:2px 9px}
+.lec{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:9px 12px;margin-bottom:8px}
+.lec-vis{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--ink-soft);cursor:pointer;white-space:nowrap}
+.lec-vis input{width:18px;height:18px;accent-color:var(--ok);cursor:pointer}
+.lec-info{flex:1;min-width:160px;font-size:13px}
+.lec-info .y{font-weight:800;color:var(--wine)}
+.lec-info .u{direction:ltr;color:var(--ink-soft);font-size:11.5px;word-break:break-all}
+.lec-del{background:transparent;border:1px solid var(--danger);color:var(--danger);border-radius:8px;padding:6px 11px;font-size:12.5px;font-weight:700;cursor:pointer}
+.lec-del:hover{background:var(--danger);color:#fff}
+.lec.hidden-lec{opacity:0.55}
+.addrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px}
+.addrow input[type=text]{flex:2;min-width:180px;padding:9px 12px;border:1px solid var(--line);border-radius:8px;font-size:13px;background:#fff;direction:ltr}
+.addrow input[type=date]{padding:9px 12px;border:1px solid var(--line);border-radius:8px;font-size:13px;background:#fff}
+.add-btn{background:var(--ok);color:#fff;border:0;border-radius:8px;padding:9px 16px;font-size:13.5px;font-weight:700;cursor:pointer;white-space:nowrap}
+.add-btn:hover{filter:brightness(1.08)}
+.empty{font-size:13px;color:var(--ink-soft);font-style:italic;padding:4px 0 8px}
+#app{display:none}
+/* toast */
+.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:12px 22px;border-radius:24px;font-size:14px;font-weight:600;z-index:100;opacity:0;pointer-events:none;transition:all .3s;max-width:90vw;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%)}
+.toast.ok{background:var(--ok)} .toast.err{background:var(--danger)}
+@media(max-width:560px){.p-name{font-size:16px}.topbar h1{font-size:15px;width:100%;margin-bottom:4px}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN GATE -->
+<div class="gate" id="gate">
+  <div class="gate-card">
+    <h1>🔐 ניהול שיעורים</h1>
+    <p id="gateSub">הזן סיסמה כדי להיכנס</p>
+    <input type="password" id="pw1" placeholder="סיסמה" autocomplete="current-password">
+    <input type="password" id="pw2" placeholder="אימות סיסמה" autocomplete="new-password" style="display:none">
+    <button id="gateBtn" onclick="gateSubmit()">כניסה</button>
+    <div class="gate-err" id="gateErr"></div>
+  </div>
+</div>
+
+<!-- ADMIN APP -->
+<div id="app">
+  <div class="topbar">
+    <h1>🗂️ ניהול שיעורי פרשת השבוע</h1>
+    <button class="tb-btn" onclick="toggleTokenBar()">⚙️ טוקן</button>
+    <button class="tb-btn" onclick="exportJson()">📤 ייצא</button>
+    <button class="tb-btn primary" onclick="publish()">💾 שמור ופרסם</button>
+    <button class="tb-btn ghost" onclick="changePassword()">סיסמה</button>
+    <button class="tb-btn ghost" onclick="logout()">יציאה</button>
+  </div>
+  <div class="tokenbar" id="tokenbar">
+    <span>🔑 GitHub Token:</span>
+    <input type="password" id="tokenInput" placeholder="github_pat_..." autocomplete="off">
+    <label><input type="checkbox" id="rememberToken"> זכור במכשיר זה</label>
+    <button class="tb-btn" onclick="saveToken()">שמור</button>
+    <button class="tb-btn" onclick="forgetToken()">שכח טוקן</button>
+  </div>
+  <div class="wrap">
+    <div class="note">
+      ➕ הוסף קישור יוטיוב + תאריך השיעור → התאריך העברי והשנה מחושבים אוטומטית.
+      ☑️ <b>הצג בעמוד</b> קובע אם הקישור מוצג באתר (פרשה עם שיעור גלוי תקבל אייקון 🎥 אוטומטית).
+      בסיום: <b>📤 ייצא</b> (ואז להעלות ל-GitHub) או <b>💾 שמור ופרסם</b> (אם הזנת טוקן).
+    </div>
+    <div id="list"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { HDate } from 'https://esm.sh/@hebcal/core@5';
+window.__hebcal = {
+  compute(iso){
+    try{
+      const p = iso.split('-').map(Number);
+      const hd = new HDate(new Date(p[0], p[1]-1, p[2]));
+      const full = hd.renderGematriya().normalize('NFKD').replace(/[֑-ׇ]/g,'');
+      const year = full.split(' ').pop();
+      return { dateHe: full, year: year };
+    }catch(e){ return { dateHe:'', year:'' }; }
+  }
+};
+</script>
+
+<script>
+const PARSHAS = [
+  {id:1,book:'bereshit',name:'בראשית'},
+  {id:2,book:'bereshit',name:'נח'},
+  {id:3,book:'bereshit',name:'לך לך'},
+  {id:4,book:'bereshit',name:'וירא'},
+  {id:5,book:'bereshit',name:'חיי שרה'},
+  {id:6,book:'bereshit',name:'תולדות'},
+  {id:7,book:'bereshit',name:'ויצא'},
+  {id:8,book:'bereshit',name:'וישלח'},
+  {id:9,book:'bereshit',name:'וישב'},
+  {id:10,book:'bereshit',name:'מקץ'},
+  {id:11,book:'bereshit',name:'ויגש'},
+  {id:12,book:'bereshit',name:'ויחי'},
+  {id:13,book:'shemot',name:'שמות'},
+  {id:14,book:'shemot',name:'וארא'},
+  {id:15,book:'shemot',name:'בא'},
+  {id:16,book:'shemot',name:'בשלח'},
+  {id:17,book:'shemot',name:'יתרו'},
+  {id:18,book:'shemot',name:'משפטים'},
+  {id:19,book:'shemot',name:'תרומה'},
+  {id:20,book:'shemot',name:'תצוה'},
+  {id:21,book:'shemot',name:'כי תשא'},
+  {id:22,book:'shemot',name:'ויקהל'},
+  {id:23,book:'shemot',name:'פקודי'},
+  {id:24,book:'vayikra',name:'ויקרא'},
+  {id:25,book:'vayikra',name:'צו'},
+  {id:26,book:'vayikra',name:'שמיני'},
+  {id:27,book:'vayikra',name:'תזריע'},
+  {id:28,book:'vayikra',name:'מצורע'},
+  {id:29,book:'vayikra',name:'אחרי מות'},
+  {id:30,book:'vayikra',name:'קדושים'},
+  {id:31,book:'vayikra',name:'אמור'},
+  {id:32,book:'vayikra',name:'בהר'},
+  {id:33,book:'vayikra',name:'בחוקותי'},
+  {id:34,book:'bamidbar',name:'במדבר'},
+  {id:35,book:'bamidbar',name:'נשא'},
+  {id:36,book:'bamidbar',name:'בהעלותך'},
+  {id:37,book:'bamidbar',name:'שלח'},
+  {id:38,book:'bamidbar',name:'קורח'},
+  {id:39,book:'bamidbar',name:'חוקת'},
+  {id:40,book:'bamidbar',name:'בלק'},
+  {id:41,book:'bamidbar',name:'פינחס'},
+  {id:42,book:'bamidbar',name:'מטות'},
+  {id:43,book:'bamidbar',name:'מסעי'},
+  {id:44,book:'devarim',name:'דברים'},
+  {id:45,book:'devarim',name:'ואתחנן'},
+  {id:46,book:'devarim',name:'עקב'},
+  {id:47,book:'devarim',name:'ראה'},
+  {id:48,book:'devarim',name:'שופטים'},
+  {id:49,book:'devarim',name:'כי תצא'},
+  {id:50,book:'devarim',name:'כי תבוא'},
+  {id:51,book:'devarim',name:'ניצבים'},
+  {id:52,book:'devarim',name:'וילך'},
+  {id:53,book:'devarim',name:'האזינו'},
+  {id:54,book:'devarim',name:'וזאת הברכה'}
+];
+const BOOKS = {bereshit:'ספר בראשית',shemot:'ספר שמות',vayikra:'ספר ויקרא',bamidbar:'ספר במדבר',devarim:'ספר דברים'};
+const BOOK_ORDER = ['bereshit','shemot','vayikra','bamidbar','devarim'];
+const REPO = 'Erezults/parasha';
+const HASH_KEY = 'parsha-admin-hash';
+const TOKEN_KEY = 'parsha-admin-token';
+const AUTH_KEY = 'parsha-admin-auth';
+
+let videos = {};      // id -> [ {url,date,dateHe,year,visible} ]
+let token = '';
+
+// ---------- crypto ----------
+async function sha256(text){
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+// ---------- toast ----------
+let toastT;
+function toast(msg, kind){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast show' + (kind ? ' ' + kind : '');
+  clearTimeout(toastT); toastT = setTimeout(() => { t.className = 'toast'; }, 3200);
+}
+
+// ---------- gate ----------
+function isFirstRun(){ return !localStorage.getItem(HASH_KEY); }
+function refreshGate(){
+  document.getElementById('gateSub').textContent = isFirstRun() ? 'הגדר סיסמה חדשה (פעם ראשונה)' : 'הזן סיסמה כדי להיכנס';
+  document.getElementById('pw2').style.display = isFirstRun() ? 'block' : 'none';
+  document.getElementById('gateBtn').textContent = isFirstRun() ? 'קבע סיסמה' : 'כניסה';
+}
+async function gateSubmit(){
+  const err = document.getElementById('gateErr'); err.textContent = '';
+  const p1 = document.getElementById('pw1').value;
+  if(!p1){ err.textContent = 'נא להזין סיסמה'; return; }
+  if(isFirstRun()){
+    const p2 = document.getElementById('pw2').value;
+    if(p1.length < 6){ err.textContent = 'סיסמה חייבת לפחות 6 תווים'; return; }
+    if(p1 !== p2){ err.textContent = 'הסיסמאות אינן תואמות'; return; }
+    localStorage.setItem(HASH_KEY, await sha256(p1));
+    enterApp();
+  } else {
+    if(await sha256(p1) === localStorage.getItem(HASH_KEY)){ enterApp(); }
+    else { err.textContent = 'סיסמה שגויה'; }
+  }
+}
+async function changePassword(){
+  const cur = prompt('הזן סיסמה נוכחית:'); if(cur === null) return;
+  if(await sha256(cur) !== localStorage.getItem(HASH_KEY)){ toast('סיסמה נוכחית שגויה', 'err'); return; }
+  const np = prompt('סיסמה חדשה (לפחות 6 תווים):'); if(!np) return;
+  if(np.length < 6){ toast('קצר מדי', 'err'); return; }
+  localStorage.setItem(HASH_KEY, await sha256(np)); toast('הסיסמה עודכנה ✓', 'ok');
+}
+function enterApp(){
+  sessionStorage.setItem(AUTH_KEY, '1');
+  document.getElementById('gate').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  token = localStorage.getItem(TOKEN_KEY) || '';
+  if(token){ document.getElementById('tokenInput').value = token; document.getElementById('rememberToken').checked = true; }
+  loadVideos();
+}
+function logout(){ sessionStorage.removeItem(AUTH_KEY); location.reload(); }
+
+// ---------- token ----------
+function toggleTokenBar(){ document.getElementById('tokenbar').classList.toggle('show'); }
+function saveToken(){
+  token = document.getElementById('tokenInput').value.trim();
+  if(document.getElementById('rememberToken').checked && token){ localStorage.setItem(TOKEN_KEY, token); }
+  else { localStorage.removeItem(TOKEN_KEY); }
+  toast(token ? 'טוקן נשמר' : 'טוקן נוקה', 'ok');
+}
+function forgetToken(){ token = ''; localStorage.removeItem(TOKEN_KEY); document.getElementById('tokenInput').value = ''; document.getElementById('rememberToken').checked = false; toast('הטוקן נמחק', 'ok'); }
+
+// ---------- data ----------
+function ytId(v){
+  if(!v) return null; v = String(v).trim();
+  if(/^[A-Za-z0-9_-]{11}$/.test(v)) return v;
+  const m = v.match(/(?:youtu\.be\/|[?&]v=|embed\/|shorts\/)([A-Za-z0-9_-]{11})/);
+  return m ? m[1] : null;
+}
+function loadVideos(){
+  fetch('videos.json', {cache:'no-store'})
+    .then(r => r.ok ? r.json() : {})
+    .then(d => { videos = (d && typeof d === 'object' && !Array.isArray(d)) ? d : {}; render(); })
+    .catch(() => { videos = {}; render(); });
+}
+function lecturesOf(id){ const v = videos[id]; return Array.isArray(v) ? v : (v && v.url ? [v] : []); }
+
+function render(){
+  let html = '';
+  BOOK_ORDER.forEach(bk => {
+    html += '<div class="book-h">' + BOOKS[bk] + '</div>';
+    PARSHAS.filter(p => p.book === bk).forEach(p => {
+      const lecs = lecturesOf(p.id);
+      const hasVisible = lecs.some(l => l.visible !== false && ytId(l.url));
+      html += '<div class="p-card">' +
+        '<div class="p-head"><div class="p-num">' + p.id + '</div><div class="p-name">פרשת ' + p.name + '</div>' +
+          (hasVisible ? '<span class="p-tag">🎥 מוצג</span>' : '') + '</div>';
+      if(lecs.length){
+        lecs.forEach((l, i) => {
+          const vid = ytId(l.url);
+          html += '<div class="lec' + (l.visible === false ? ' hidden-lec' : '') + '">' +
+            '<label class="lec-vis"><input type="checkbox" ' + (l.visible !== false ? 'checked' : '') + ' onchange="toggleVis(' + p.id + ',' + i + ',this.checked)"> הצג בעמוד</label>' +
+            '<div class="lec-info"><span class="y">' + (l.year || '') + (l.date ? ' · ' + l.date : '') + '</span>' +
+              (l.dateHe ? ' <span style="color:var(--ink-soft)">(' + l.dateHe + ')</span>' : '') +
+              '<div class="u">' + (vid ? 'youtu.be/' + vid : '⚠️ קישור לא תקין: ' + (l.url||'')) + '</div></div>' +
+            '<button class="lec-del" onclick="delLec(' + p.id + ',' + i + ')">🗑️ מחק</button>' +
+          '</div>';
+        });
+      } else {
+        html += '<div class="empty">אין שיעורים עדיין</div>';
+      }
+      html += '<div class="addrow">' +
+        '<input type="text" id="url-' + p.id + '" placeholder="קישור יוטיוב (https://youtu.be/...)">' +
+        '<input type="date" id="date-' + p.id + '" title="תאריך השיעור">' +
+        '<button class="add-btn" onclick="addLec(' + p.id + ')">➕ הוסף</button>' +
+      '</div></div>';
+    });
+  });
+  document.getElementById('list').innerHTML = html;
+}
+
+function addLec(id){
+  const urlEl = document.getElementById('url-' + id), dateEl = document.getElementById('date-' + id);
+  const url = urlEl.value.trim(), date = dateEl.value;
+  if(!ytId(url)){ toast('קישור יוטיוב לא תקין', 'err'); return; }
+  if(!date){ toast('נא לבחור תאריך שיעור', 'err'); return; }
+  const he = (window.__hebcal ? window.__hebcal.compute(date) : {dateHe:'',year:''});
+  if(!Array.isArray(videos[id])) videos[id] = [];
+  videos[id].push({ url:'https://youtu.be/' + ytId(url), date:date, dateHe:he.dateHe, year:he.year, visible:true });
+  urlEl.value = ''; dateEl.value = '';
+  render(); toast('נוסף: ' + he.year, 'ok');
+}
+function delLec(id, i){
+  const lecs = lecturesOf(id);
+  if(!confirm('למחוק את השיעור (' + (lecs[i] ? lecs[i].year : '') + ')?')) return;
+  videos[id].splice(i, 1);
+  if(!videos[id].length) delete videos[id];
+  render();
+}
+function toggleVis(id, i, val){ if(videos[id] && videos[id][i]){ videos[id][i].visible = val; render(); } }
+
+// ---------- output ----------
+function cleanJson(){
+  const out = {};
+  Object.keys(videos).forEach(k => { if(Array.isArray(videos[k]) && videos[k].length) out[k] = videos[k]; });
+  return JSON.stringify(out, null, 2);
+}
+function exportJson(){
+  const blob = new Blob([cleanJson()], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = 'videos.json'; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  toast('videos.json הורד — העלה אותו ל-GitHub כדי לפרסם', 'ok');
+}
+function b64utf8(str){ return btoa(unescape(encodeURIComponent(str))); }
+async function publish(){
+  const tok = (document.getElementById('tokenInput').value.trim() || token);
+  if(!tok){ toast('אין טוקן — השתמש ב-📤 ייצא, או הזן טוקן ב-⚙️', 'err'); toggleTokenBar(); return; }
+  toast('מפרסם...', null);
+  try{
+    const api = 'https://api.github.com/repos/' + REPO + '/contents/videos.json';
+    const headers = { 'Authorization':'Bearer ' + tok, 'Accept':'application/vnd.github+json' };
+    let sha;
+    const g = await fetch(api + '?ref=main', { headers });
+    if(g.ok){ sha = (await g.json()).sha; }
+    else if(g.status !== 404){ throw new Error('שגיאת קריאה: ' + g.status); }
+    const body = { message:'Update videos.json via admin', content:b64utf8(cleanJson()), branch:'main' };
+    if(sha) body.sha = sha;
+    const put = await fetch(api, { method:'PUT', headers, body:JSON.stringify(body) });
+    if(put.ok){ toast('פורסם בהצלחה! חי באתר תוך ~דקה ✓', 'ok'); }
+    else { const e = await put.json().catch(()=>({})); throw new Error(e.message || ('HTTP ' + put.status)); }
+  }catch(err){ toast('פרסום נכשל: ' + err.message, 'err'); }
+}
+
+// ---------- init ----------
+['gateBtn'].forEach(()=>{});
+document.getElementById('pw1').addEventListener('keydown', e => { if(e.key === 'Enter') gateSubmit(); });
+document.getElementById('pw2').addEventListener('keydown', e => { if(e.key === 'Enter') gateSubmit(); });
+refreshGate();
+if(sessionStorage.getItem(AUTH_KEY) === '1' && !isFirstRun()) enterApp();
+</script>
+</body>
+</html>
