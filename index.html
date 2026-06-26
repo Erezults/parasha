@@ -1890,7 +1890,7 @@ function showLectureYear(id, idx, btn){
   if(btn){ const par = btn.parentElement; par.querySelectorAll('.year-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); }
 }
 function loadVideosJson(){
-  fetch('videos.json', {cache:'no-store'})
+  fetch('videos.json?t=' + Date.now(), {cache:'no-store'})
     .then(r => r.ok ? r.json() : null)
     .then(data => {
       if(data && typeof data === 'object' && !Array.isArray(data)){

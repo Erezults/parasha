@@ -266,7 +266,7 @@ function ytId(v){
   return m ? m[1] : null;
 }
 function loadVideos(){
-  fetch('videos.json', {cache:'no-store'})
+  fetch('videos.json?t=' + Date.now(), {cache:'no-store'})
     .then(r => r.ok ? r.json() : {})
     .then(d => { videos = (d && typeof d === 'object' && !Array.isArray(d)) ? d : {}; render(); })
     .catch(() => { videos = {}; render(); });

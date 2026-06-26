@@ -1,5 +1,5 @@
 /* Service Worker — offline support for the parsha site */
-const CACHE = 'parsha-cache-v2';
+const CACHE = 'parsha-cache-v3';
 const CORE = [
   './',
   './manifest.json',
@@ -23,9 +23,10 @@ self.addEventListener('activate', (e) => {
 self.addEventListener('fetch', (e) => {
   const req = e.request;
   if (req.method !== 'GET') return;
-  const sameOrigin = new URL(req.url).origin === location.origin;
-  // Network-first for same-origin navigations/HTML so updates show; cache-first otherwise.
-  if (sameOrigin && req.mode === 'navigate') {
+  const url = new URL(req.url);
+  const sameOrigin = url.origin === location.origin;
+  // Network-first for navigations AND for videos.json so new lectures always show.
+  if (sameOrigin && (req.mode === 'navigate' || url.pathname.endsWith('/videos.json') || url.pathname.endsWith('videos.json'))) {
     e.respondWith(
       fetch(req).then((resp) => {
         const copy = resp.clone();
